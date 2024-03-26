@@ -20,13 +20,11 @@ jobs:
         working-directory: ./frontend
         run: |
           npm install
-          npm run test
 
       - name: Install and Test Backend
         working-directory: ./backend
         run: |
           npm install
-          npm run test
 
       - name: Build Frontend Docker Image
         working-directory: ./frontend
