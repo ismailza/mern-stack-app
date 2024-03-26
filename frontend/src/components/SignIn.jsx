@@ -8,24 +8,27 @@ import Spinner from 'react-bootstrap/Spinner';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import { useAuthContext } from '../context/AuthContext';
-import { useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
-function SignIn() {
+const SignIn = () => {
+
   const schema = yup.object().shape({
     username: yup.string().required(),
     password: yup.string().required(),
   });
 
-  const { login, checkUserLoggedIn } = useAuthContext();
-
-  checkUserLoggedIn();
+  const { login } = useAuthContext();
+  const navigate = useNavigate();
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       setSubmitting(true);
-      await login({login: values.username, password: values.password});
+      await login({ login: values.username, password: values.password });
+      toast.success('Login successful.');
+      navigate('/');
     } catch (error) {
-      console.error(error);
+      toast.error(error.data.message);
     } finally {
       setSubmitting(false);
     }
