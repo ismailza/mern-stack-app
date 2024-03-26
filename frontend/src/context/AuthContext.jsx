@@ -1,13 +1,15 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import axios from '../api/axios';
+import { UseAPI } from '../hook/UseAPI';
 
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
   const navigate = useNavigate();
+
+  const { request } = UseAPI();
 
   useEffect(() => {
     if (!user) {
@@ -17,36 +19,34 @@ const AuthProvider = ({ children }) => {
 
   const checkUserLoggedIn = async () => {
     try {
-      const response = await axios.get('/api/user');
-      if (response.data.result) {
-        toast.success('User already logged in.');
+      const response = await request('get', '/api/user');
+      if (response) {
         setUser(response.data.result);
       }
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
   const login = async ({ ...credentials }) => {
     try {
-      const response = await axios.post('/api/signin', credentials);
-      setUser(response.data.result);
+      const response = await request('post', '/api/signin', credentials);
+      setUser(response);
       localStorage.setItem('user', JSON.stringify(response.data.result));
-      toast.success('Login successful.');
-      navigate('/');
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message);
+      throw error.response;
     }
   };
 
   const logout = async () => {
     try {
-      await axios.delete('/api/signout');
+      await request('delete', '/api/signout');
       setUser(null);
       localStorage.removeItem('user');
       toast.success('Logout successful.');
-      navigate('/login');
+      navigate('/signin');
     } catch (error) {
       console.error(error);
       toast.error('An error occurred while logging out.');
